@@ -11,42 +11,23 @@
 		if(strlen(implode('', $valid)) == 0 ){
 			global $wpdb;
 			$wpdb->query(
-				$wpdb->prepare('UPDATE '.DOMESTIC_VOTE_PLUGIN_TABLE_NAME.' SET name = %s WHERE id = %s;',$_POST['name'],$_POST['id'])
+				$wpdb->prepare('INSERT INTO '.DOMESTIC_VOTE_PLUGIN_TABLE_NAME.'(name) VALUES (%s);',$_POST['name'])
 			);
 			$mode = 'add';
 			$add_item_name = $_POST['name'];
 			$_POST = array();
-			setFormData();
 		}
 		else {
 			$mode = 'error';
 		}
 	}
-	else {
-		setFormData();
-	}
-
-	function setFormData () {
-		if(isset($_GET['id'])) {
-			global $wpdb;
-			$type_data = $wpdb->get_results(
-				'SELECT id,name FROM '.DOMESTIC_VOTE_PLUGIN_TABLE_NAME.' WHERE id ='.$_GET['id']
-			);
-			foreach ($type_data[0] as $key => $value) {
-				$_POST[$key] = $value;
-			}
-		}
-		else {
-			die('不正なリクエストです');
-		}
-	}
 ?>
 <div class="wrap">
-	<h1><?php $DU->_($CA::$plugin_name); ?> <?php $DU->_('データ編集'); ?> </h1>
+	<h1><?php $DU->_($CA::$plugin_name); ?> <?php $DU->_('データ登録'); ?> </h1>
 	<link rel="stylesheet" type="text/css" href="<?php echo ($plugins_url.'/'.$CA::$plugin_fix.'/css/'.$CA::$plugin_fix.'.css'); ?>">
 	<form method="post">
 	<?php if ($mode == 'add'): ?>
-		<div id="message" class="updated"><p><?php $DU->_('【'.$add_item_name.'】を編集しました'); ?></p></div>
+		<div id="message" class="updated"><p><?php $DU->_('【'.$add_item_name.'】を登録しました'); ?></p></div>
 	<?php endif; ?>
 	<?php if ($mode == 'error'): ?>
 		<div id="message" class="error"><p><?php $DU->_('入力内容に不備があります'); ?></p></div>
@@ -59,16 +40,16 @@
 				</th>
 				<td>
 					<input name="name" value="<?php $DU->iz($_POST['name']); ?>" />
-					<?php $DU->_echo($valid['name']); ?>
+					<?php 
+						$DU->_echo($valid['name']);
+					?>
 				</td>
 			</tr>
 		</tbody>
 	</table>
 	<p class="submit">
-
-		<input type="hidden" name="id" value="<?php $DU->iz($_POST['id']); ?>" />
-		<input type="submit" name="submit" id="domestic-vote-submit-regist" class="button button-primary" value="<?php $DU->_('保存'); ?>">
-		<a href="<?php echo $DU->thisPluginUrl(); ?>" class="button button-delete" ><?php $DU->_('キャンセル'); ?></a>
+		<input type="submit" name="submit" id="domestic-vote-submit-regist" class="button button-primary" value="<?php $DU->_('Add'); ?>">
+		<a href="<?php echo $DU->thisPluginUrl(); ?>" class="button button-delete" ><?php $DU->_('Cancel'); ?></a>
 	</p>
 	</form>
 </div>

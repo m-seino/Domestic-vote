@@ -90,6 +90,9 @@ class DomesticvoteControler {
 			else if(isset($_GET['mode']) && $_GET['mode'] == 'edit') {
 				include_once 'domestic_vote-data-edit.php';
 			}
+			else if(isset($_GET['mode']) && $_GET['mode'] == 'info') {
+				include_once 'domestic_vote-data-info.php';
+			}
 			else {
 				include_once 'domestic_vote-setting-page.php';
 			}
@@ -97,8 +100,6 @@ class DomesticvoteControler {
 		function domestic_vote_regist_ajax_actions() {
 			add_action( 'wp_ajax_domestic_vote_countup', 'domestic_vote_countup_callback' );
 			function domestic_vote_countup_callback() {
-				print_r($_POST);
-
 				// Validation
 				if(!isset($_POST['type_id']) || empty($_POST['type_id'])) {
 					echo __('エラー：リクエストパラメータ type_id がありません。');
@@ -129,10 +130,7 @@ class DomesticvoteControler {
 			    	);
 				}
 
-				print_r($_prepare);
-
 				$vote_record = $wpdb->get_results($_prepare);
-				print_r($vote_record);
 				$result = '';
 				if(empty($vote_record[0]->count)) {
 					$result = $wpdb->query(
@@ -159,19 +157,12 @@ class DomesticvoteControler {
 					echo $_count;
 				}
 				die;
-
-				print_r($result);
-
-				echo "test";die;
-				if(!is_user_logged_in()) {
-					die('read faild.');
-				}
-
-				$get_meta = $wpdb->get_results(
-					'SELECT * FROM '.DOMESTIC_VOTE_PLUGIN_TABLE_NAME
-				);
-				echo json_encode($get_meta);
-				die();
+			}
+			add_action( 'wp_ajax_domestic_vote_read', 'domestic_vote_read_callback' );
+			function domestic_vote_read_callback() {
+				// 投票項目の取得
+				echo "testttt";
+				die;
 			}
 		}
 		domestic_vote_regist_ajax_actions();
@@ -205,55 +196,6 @@ class DomesticvoteControler {
 			}
 		}
 		domestic_vote_init_database();
-		function set_domestic_vote(){
-
-			global $wpdb;
-			global $menu;
-			global $submenu;
-			global $wp_post_types;
-			global $wp_roles;
-
-			if(!function_exists('wp_get_current_user')) {
-			    include(ABSPATH . "wp-includes/pluggable.php"); 
-			}
-		    $user = wp_get_current_user();
-		    $role = $user->roles[0];
-
-		    if($role === 'administrator') {
-		    	return;
-		    }
-			$settings = $wpdb->get_results(
-		    	$wpdb->prepare(
-		    		'SELECT 
-			    		id , 
-			    		name , 
-			    		count 
-		    		FROM '.DOMESTIC_VOTE_PLUGIN_TABLE_NAME.' 
-		    		WHERE role_name = %s',$role
-		    	)
-			);
-
-
-			// remove caps	
-			foreach ($settings as $setting) {
-				$_type = $wp_post_types[$setting->disable_menu_key];
-				if (isset($_type->cap->{$setting->remove_cap})) {
-					unset($_type->cap->{$setting->remove_cap});
-				}
-			}
-			// remove menu	
-			foreach ($settings as $setting) {
-				if(!empty($setting->disable_submenu_key)) {
-					unset($submenu[$menu[$setting->disable_menu_key][2]][$setting->disable_submenu_key]);
-				}
-			}
-			foreach ($settings as $setting) {
-				if(empty($setting->disable_submenu_key) && empty($setting->remove_cap)) {
-					unset($menu[$setting->disable_menu_key]);
-				}
-			}
-		}
-		add_action( 'domestic_vote', 'set_domestic_vote', 999 );
 
 		function domestic_vote_shortcode($atts) {
 			extract(shortcode_atts(array(
