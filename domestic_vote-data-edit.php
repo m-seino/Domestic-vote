@@ -37,7 +37,8 @@
 			}
 		}
 		else {
-			die('不正なリクエストです');
+			$DU->_('不正なリクエストです');
+			die;
 		}
 	}
 ?>
@@ -67,8 +68,8 @@
 	<p class="submit">
 
 		<input type="hidden" name="id" value="<?php $DU->iz($_POST['id']); ?>" />
-		<input type="submit" name="submit" id="domestic-vote-submit-regist" class="button button-primary" value="<?php $DU->_('保存'); ?>">
-		<a href="<?php echo $DU->thisPluginUrl(); ?>" class="button button-delete" ><?php $DU->_('キャンセル'); ?></a>
+		<input type="submit" name="submit" id="domestic-vote-submit-regist" class="button button-primary" value="<?php $DU->_('変更を保存'); ?>">
+		<a href="<?php echo $DU->thisPluginUrl(); ?>" class="button button-delete" ><?php $DU->_('戻る'); ?></a>
 	</p>
 	</form>
 </div>

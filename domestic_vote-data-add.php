@@ -48,8 +48,8 @@
 		</tbody>
 	</table>
 	<p class="submit">
-		<input type="submit" name="submit" id="domestic-vote-submit-regist" class="button button-primary" value="<?php $DU->_('Add'); ?>">
-		<a href="<?php echo $DU->thisPluginUrl(); ?>" class="button button-delete" ><?php $DU->_('Cancel'); ?></a>
+		<input type="submit" name="submit" id="domestic-vote-submit-regist" class="button button-primary" value="<?php $DU->_('追加'); ?>">
+		<a href="<?php echo $DU->thisPluginUrl(); ?>" class="button button-delete" ><?php $DU->_('戻る'); ?></a>
 	</p>
 	</form>
 </div>

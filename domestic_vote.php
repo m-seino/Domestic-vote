@@ -8,6 +8,7 @@ Author: Maiko Seino
 Author URI: http://incr.jp
 License: GPLv2
 */
+require_once( ABSPATH . "wp-includes/pluggable.php" );
 class DomesticvoteUtil {
 	public function thisPluginUrl($mode = null , $id = null) {
 		$baseUrl = admin_url().'options-general.php?page='.DomesticvoteControler::$plugin_fix.'/'.DomesticvoteControler::$plugin_fix.'.php';
@@ -60,6 +61,7 @@ class DomesticvoteValidator {
 	}
 }
 class DomesticvoteControler {
+
 	public static $plugin_name = 'Domestic vote';
 	public static $plugin_fix = 'domestic_vote';
 	public static $table_name = 'domestic_vote_type';
@@ -75,6 +77,10 @@ class DomesticvoteControler {
 		return $menu_position;
 	}
 	public function DomesticvoteControler() {
+
+		// ログインして無ければリクエストは受け付けない
+		if(!is_user_logged_in()) {die('request faild.');}
+
 		global $wpdb;
 		define('DOMESTIC_VOTE_PLUGIN_TABLE_NAME', $wpdb->prefix . DomesticvoteControler::$table_name);
 		define('DOMESTIC_VOTE_PLUGIN_COUNT_TABLE_NAME', $wpdb->prefix . DomesticvoteControler::$sub_table_name);
@@ -92,6 +98,9 @@ class DomesticvoteControler {
 			}
 			else if(isset($_GET['mode']) && $_GET['mode'] == 'info') {
 				include_once 'domestic_vote-data-info.php';
+			}
+			else if(isset($_GET['mode']) && $_GET['mode'] == 'delete') {
+				include_once 'domestic_vote-data-delete.php';
 			}
 			else {
 				include_once 'domestic_vote-setting-page.php';
@@ -145,23 +154,111 @@ class DomesticvoteControler {
 				}
 				else {
 					$_count = $vote_record[0]->count + 1;
-					$result = $wpdb->query(
-						$wpdb->prepare(
-							'UPDATE '.DOMESTIC_VOTE_PLUGIN_COUNT_TABLE_NAME.' SET count = %d '.$_where,
-				    		$_count,
-				    		$_POST['type_id'],
-				    		$_POST['post_id'],
-				    		$_POST['unique_id'] == '' ? '0' : $_POST['unique_id']
-						)
-					);
+
+					if(($_POST['unique_id'] == '') || ($_POST['unique_id'] != '' && $_POST['allow_duplicate_count'] == 'true')) {
+						$result = $wpdb->query(
+							$wpdb->prepare(
+								'UPDATE '.DOMESTIC_VOTE_PLUGIN_COUNT_TABLE_NAME.' SET count = %d '.$_where,
+								$_count,
+								$_POST['type_id'],
+								$_POST['post_id'],
+								$_POST['unique_id'] == '' ? '0' : $_POST['unique_id']
+							)
+						);
+					}
 					echo $_count;
 				}
 				die;
 			}
 			add_action( 'wp_ajax_domestic_vote_read', 'domestic_vote_read_callback' );
 			function domestic_vote_read_callback() {
+				global $wpdb;
+				$_arr = array();
+
+				$_arr['columns_id'] = array();
+				$type_data = $wpdb->get_results(
+					'SELECT id,name FROM '.DOMESTIC_VOTE_PLUGIN_TABLE_NAME.' ORDER BY id asc '
+				);
+
+				$_subQuerys = array();
+				$_columns_str = '';
+				$_where_arr = array();
 				// 投票項目の取得
-				echo "testttt";
+				foreach ($type_data as $key => $value) {
+					$_columns_str .= 'count_'.$value->id.',';
+					$_arr['columns_id'][] = $value->id;
+					$_arr['columns_name'][] = $value->name;
+					$_where_arr[] = 'count_'.$value->id.' IS NOT NULL';
+
+					$_subQuerys[] = '
+					(
+						SELECT 
+							post.ID as ID'.$value->id.', 
+							SUM( count.count ) AS count_'.$value->id.'
+						FROM 
+							'.$wpdb->prefix.'posts AS post
+						LEFT JOIN 
+							'.DOMESTIC_VOTE_PLUGIN_COUNT_TABLE_NAME.' AS count 
+						ON post.ID = count.post_id
+						WHERE count.type_id = '.$value->id.'
+						GROUP BY post.id
+					) as sub'.$value->id.'
+					';
+				}
+
+				// 投票内訳のクエリを生成
+				$_stash = array();
+				$_cnt =  count($_subQuerys);
+
+				$i = 0;
+				for (; $i < $_cnt; $i++) { 
+					$_stash[] = $_subQuerys[$i];
+					if(count($_stash) == 2) {
+						$_temp = '';
+						$_temp2 = '';
+						$_temp = implode(' LEFT JOIN ', $_stash);
+						$_temp .= '
+							 ON sub'.$_arr['columns_id'][$i].'.ID'.$_arr['columns_id'][$i].
+							 ' =  sub'.$_arr['columns_id'][$i-1].
+							 '.ID'.$_arr['columns_id'][$i-1].' ';
+
+						$_temp2 = implode(' RIGHT JOIN ', $_stash);
+						$_temp2 .= '
+							 ON sub'.$_arr['columns_id'][$i].'.ID'.$_arr['columns_id'][$i].
+							 ' =  sub'.$_arr['columns_id'][$i-1].
+							 '.ID'.$_arr['columns_id'][$i-1].' ';
+						$_temp = 'SELECT * FROM ((SELECT * FROM '.$_temp.') UNION (SELECT * FROM '.$_temp2.')) as uni';
+
+						$_temp = '('.$_temp.') as sub'.$_arr['columns_id'][$i];
+						$_stash = array($_temp);
+					}
+				}
+
+
+				$_joinQuery = array();
+				$_subQueryName = 'sub'.$_arr['columns_id'][$i-1];
+				foreach ($_arr['columns_id'] as $key => $value) {
+					$_joinQuery[] = 'post.ID = '.$_subQueryName.'.ID'.$value;
+				}
+				$_query = '
+				SELECT
+					'.$_columns_str.'
+					post.ID,
+					post.post_title
+				FROM
+					'.$wpdb->prefix.'posts as post
+				LEFT JOIN
+					'.$_temp.'
+				ON
+					'.implode(' OR ', $_joinQuery).'
+				WHERE 
+					'.implode(' OR ', $_where_arr).'
+				';
+
+				$_arr['data'] = $type_data = $wpdb->get_results(
+					$_query
+				);
+				echo json_encode($_arr);
 				die;
 			}
 		}
@@ -203,6 +300,8 @@ class DomesticvoteControler {
 				'post_id' => '',
 				'unique_id' => 'null',
 				'html' => '',
+				'show_view_count' => false,
+				'allow_duplicate_count' => false,
 				'class' => null
 			), $atts));
 
@@ -220,13 +319,24 @@ class DomesticvoteControler {
 				return;
 			}
 
-			$_tag = '<a href="#" data-type_id="{{type_id}}" data-post_id="{{post_id}}" data-unique_id="{{unique_id}}" class="domestic_vote_voting {{class}}">{{html}}</a>';
+			$_tag = '<a href="#" data-type_id="{{type_id}}" data-post_id="{{post_id}}" data-allow_duplicate_count="{{allow_duplicate_count}}" data-unique_id="{{unique_id}}" class="domestic_vote_voting {{class}}">{{show_view_count}}{{html}}</a>';
 
 			$_tag = str_replace('{{type_id}}', $type_id, $_tag);
 			$_tag = str_replace('{{post_id}}', $post_id, $_tag);
+			$_tag = str_replace('{{allow_duplicate_count}}', $allow_duplicate_count, $_tag);
 			$_tag = str_replace('{{unique_id}}', $unique_id, $_tag);
 			$_tag = str_replace('{{html}}', $html, $_tag);
 			$_tag = str_replace('{{class}}', $class, $_tag);
+
+			if($show_view_count) {
+				$_query = 'SELECT SUM( count ) AS count FROM '.DOMESTIC_VOTE_PLUGIN_COUNT_TABLE_NAME.' WHERE type_id = '.$type_id.' AND post_id = '.$post_id.' GROUP BY post_id';
+				global $wpdb;
+				$_result = $wpdb->get_results( $_query );
+				$_tag = str_replace('{{show_view_count}}', '<span class="dvote_count">'.$_result[0]->count.'</span>', $_tag);
+			}
+			else {
+				$_tag = str_replace('{{show_view_count}}', '', $_tag);
+			}
 
 			return $_tag;
 		}
@@ -239,18 +349,22 @@ echo<<<EOL
 $(function(){
 	// reset
 	$('.domestic_vote_voting').on('click',function(e){
+		var _self = $(this);
 		e.preventDefault();
 		$.ajax({
-			type: "POST",
+			type: 'POST',
 			url: ajaxurl,
+			datatype : 'text',
 			data: {
 				'action': 'domestic_vote_countup',
 				'type_id' : $(this).data('type_id'),
 				'post_id' : $(this).data('post_id'),
+				'allow_duplicate_count' : $(this).data('allow_duplicate_count'),
 				'unique_id' : $(this).data('unique_id'),
 			}
 		})
 		.done(function( data ) {
+			_self.find('.dvote_count').text(data);
 			console.log(data);
 		});
 	});
