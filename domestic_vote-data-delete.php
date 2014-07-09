@@ -1,4 +1,5 @@
 <?php 
+	if(!is_user_logged_in()) {die('request faild.');}
 	include_once 'domestic_vote-vars.php';
 ?>
 <?php 
@@ -17,7 +18,7 @@
 		include_once 'domestic_vote-setting-page.php';
 	}
 	else {
-		$DU->_('不正なリクエストです');
+		$domestic_vote_util->_('不正なリクエストです');
 		die;
 	}
 ?>

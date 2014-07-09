@@ -28,16 +28,16 @@
 	}
 ?>
 <div class="wrap">
-	<h1><?php $DU->iz($_votedata['name']); ?> <?php $DU->_('投票数情報'); ?> </h1>
-	<link rel="stylesheet" type="text/css" href="<?php echo ($plugins_url.'/'.$CA::$plugin_fix.'/css/'.$CA::$plugin_fix.'.css'); ?>">
+	<h1><?php $domestic_vote_util->iz($_votedata['name']); ?> <?php $domestic_vote_util->_('投票数情報'); ?> </h1>
+	<link rel="stylesheet" type="text/css" href="<?php echo ($plugins_url.'/'.$domestic_vote_controler::$plugin_fix.'/css/'.$domestic_vote_controler::$plugin_fix.'.css'); ?>">
 	<form method="post">
 	<table class="wp-list-table widefat fixed">
 		<thead>
 			<th width="80%">
-				<?php $DU->_('投稿タイトル'); ?> 
+				<?php $domestic_vote_util->_('投稿タイトル'); ?> 
 			</th>
 			<th width="20%">
-				<?php $DU->_('得票数'); ?> 
+				<?php $domestic_vote_util->_('得票数'); ?> 
 			</th>
 		</thead>
 		<tbody>
@@ -45,23 +45,23 @@
 			<tr>
 				<td>
 					<a href="<?php echo get_permalink( $value->ID );?>" target="_blank">
-					<?php $DU->_($value->post_title); ?> 
+					<?php $domestic_vote_util->_($value->post_title); ?> 
 					</a>
 				</td>
 				<td>
-					<?php $DU->_($value->count); ?> 
+					<?php $domestic_vote_util->_($value->count); ?> 
 				</td>
 			</tr>
 			<?php endforeach ?>
 			<?php if (count($vote_data) == 0): ?>
 				<td colspan="2">
-					<?php $DU->_('投票データがありません'); ?> 
+					<?php $domestic_vote_util->_('投票データがありません'); ?> 
 				</td>
 			<?php endif ?>
 		</tbody>
 	</table>
 	<p class="submit">
-		<a href="<?php echo $DU->thisPluginUrl(); ?>" class="button button-delete" ><?php $DU->_('戻る'); ?></a>
+		<a href="<?php echo $domestic_vote_util->thisPluginUrl(); ?>" class="button button-delete" ><?php $domestic_vote_util->_('戻る'); ?></a>
 	</p>
 	</form>
 </div>

@@ -5,8 +5,8 @@
 	$valid = array();
 	$mode = '';
 	if($_POST) {
-		$valid['name'] = $DV->validate(array(
-			$DV::$VALIDATE_TYPE_REQUIRE
+		$valid['name'] = $domestic_vote_validator->validate(array(
+			$domestic_vote_validator::$VALIDATE_TYPE_REQUIRE
 		),$_POST['name'],'<p>','<br>','</p>','名前');
 		if(strlen(implode('', $valid)) == 0 ){
 			global $wpdb;
@@ -23,33 +23,33 @@
 	}
 ?>
 <div class="wrap">
-	<h1><?php $DU->_($CA::$plugin_name); ?> <?php $DU->_('データ登録'); ?> </h1>
-	<link rel="stylesheet" type="text/css" href="<?php echo ($plugins_url.'/'.$CA::$plugin_fix.'/css/'.$CA::$plugin_fix.'.css'); ?>">
+	<h1><?php $domestic_vote_util->_($domestic_vote_controler::$plugin_name); ?> <?php $domestic_vote_util->_('データ登録'); ?> </h1>
+	<link rel="stylesheet" type="text/css" href="<?php echo ($plugins_url.'/'.$domestic_vote_controler::$plugin_fix.'/css/'.$domestic_vote_controler::$plugin_fix.'.css'); ?>">
 	<form method="post">
 	<?php if ($mode == 'add'): ?>
-		<div id="message" class="updated"><p><?php $DU->_('【'.$add_item_name.'】を登録しました'); ?></p></div>
+		<div id="message" class="updated"><p><?php $domestic_vote_util->_('【'.$add_item_name.'】を登録しました'); ?></p></div>
 	<?php endif; ?>
 	<?php if ($mode == 'error'): ?>
-		<div id="message" class="error"><p><?php $DU->_('入力内容に不備があります'); ?></p></div>
+		<div id="message" class="error"><p><?php $domestic_vote_util->_('入力内容に不備があります'); ?></p></div>
 	<?php endif; ?>
 	<table class="wp-list-table widefat fixed">
 		<tbody>
 			<tr>
 				<th width="100px;">
-					<?php $DU->_('Name'); ?> 
+					<?php $domestic_vote_util->_('Name'); ?> 
 				</th>
 				<td>
-					<input name="name" value="<?php $DU->iz($_POST['name']); ?>" />
+					<input name="name" value="<?php $domestic_vote_util->iz($_POST['name']); ?>" />
 					<?php 
-						$DU->_echo($valid['name']);
+						$domestic_vote_util->_echo($valid['name']);
 					?>
 				</td>
 			</tr>
 		</tbody>
 	</table>
 	<p class="submit">
-		<input type="submit" name="submit" id="domestic-vote-submit-regist" class="button button-primary" value="<?php $DU->_('Add'); ?>">
-		<a href="<?php echo $DU->thisPluginUrl(); ?>" class="button button-delete" ><?php $DU->_('Cancel'); ?></a>
+		<input type="submit" name="submit" id="domestic-vote-submit-regist" class="button button-primary" value="<?php $domestic_vote_util->_('Add'); ?>">
+		<a href="<?php echo $domestic_vote_util->thisPluginUrl(); ?>" class="button button-delete" ><?php $domestic_vote_util->_('Cancel'); ?></a>
 	</p>
 	</form>
 </div>

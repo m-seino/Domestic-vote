@@ -9,6 +9,8 @@ Author URI: http://incr.jp
 License: GPLv2
 */
 require_once( ABSPATH . "wp-includes/pluggable.php" );
+
+
 class DomesticvoteUtil {
 	public function thisPluginUrl($mode = null , $id = null) {
 		$baseUrl = admin_url().'options-general.php?page='.DomesticvoteControler::$plugin_fix.'/'.DomesticvoteControler::$plugin_fix.'.php';
@@ -67,19 +69,7 @@ class DomesticvoteControler {
 	public static $table_name = 'domestic_vote_type';
 	public static $sub_table_name = 'domestic_vote_popularcount';
 
-	public function getMenuKey($menu_position) {
-		global $wp_post_types;
-		foreach ($wp_post_types as $key => $value) {
-			if($value->menu_position == $menu_position) {
-				return $key;
-			}
-		}
-		return $menu_position;
-	}
 	public function DomesticvoteControler() {
-
-		// ログインして無ければリクエストは受け付けない
-		if(!is_user_logged_in()) {die('request faild.');}
 
 		global $wpdb;
 		define('DOMESTIC_VOTE_PLUGIN_TABLE_NAME', $wpdb->prefix . DomesticvoteControler::$table_name);
@@ -180,6 +170,11 @@ class DomesticvoteControler {
 					'SELECT id,name FROM '.DOMESTIC_VOTE_PLUGIN_TABLE_NAME.' ORDER BY id asc '
 				);
 
+				if(count($type_data) == 0) {
+					echo "{}";
+					die;
+				}
+
 				$_subQuerys = array();
 				$_columns_str = '';
 				$_where_arr = array();
@@ -271,11 +266,19 @@ class DomesticvoteControler {
 				require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 				$sql = "
 					CREATE TABLE " . $table_name . " (
-					id bigint(20) NOT NULL AUTO_INCREMENT,
+					id int(20) NOT NULL AUTO_INCREMENT,
 					name varchar(100) NOT NULL,
 					UNIQUE KEY id (id)
 				);";
 				dbDelta($sql);
+
+				// サンプル用データ
+				$wpdb->query(
+					$wpdb->prepare('INSERT INTO '.DOMESTIC_VOTE_PLUGIN_TABLE_NAME.'(name) VALUES (%s);','sample_1')
+				);
+				$wpdb->query(
+					$wpdb->prepare('INSERT INTO '.DOMESTIC_VOTE_PLUGIN_TABLE_NAME.'(name) VALUES (%s);','sample_2')
+				);
 			}
 			$sub_table_name = $wpdb->prefix . DomesticvoteControler::$sub_table_name;
 			if($wpdb->get_var("SHOW TABLES LIKE '$sub_table_name'") != $sub_table_name) {
@@ -285,12 +288,13 @@ class DomesticvoteControler {
 					id bigint(20) NOT NULL AUTO_INCREMENT,
 					type_id bigint(20) NOT NULL,
 					post_id bigint(20) NOT NULL,
-					unique_id varcher(100) ,
+					unique_id varchar(100) ,
 					count bigint(20) NOT NULL,
 					UNIQUE KEY id (id)
 				);";
 				dbDelta($sql);
 			}
+
 		}
 		domestic_vote_init_database();
 
@@ -302,7 +306,10 @@ class DomesticvoteControler {
 				'html' => '',
 				'show_view_count' => false,
 				'allow_duplicate_count' => false,
-				'class' => null
+				'on_duplicate_html' => '',
+				'callback' => '',
+				'id' => '',
+				'class' => ''
 			), $atts));
 
 
@@ -318,8 +325,16 @@ class DomesticvoteControler {
 				echo __('ショートコードエラー ： htmlの指定がありません。');
 				return;
 			}
+			if($allow_duplicate_count == 'true' && $unique_id != '') {
+				echo __('ショートコードエラー ： allow_duplicate_countはunique_idの指定が必要です。');
+				return;
+			}
 
-			$_tag = '<a href="#" data-type_id="{{type_id}}" data-post_id="{{post_id}}" data-allow_duplicate_count="{{allow_duplicate_count}}" data-unique_id="{{unique_id}}" class="domestic_vote_voting {{class}}">{{show_view_count}}{{html}}</a>';
+			$_tag = '<a href="#" {{id}} data-type_id="{{type_id}}" data-post_id="{{post_id}}" data-allow_duplicate_count="{{allow_duplicate_count}}" data-unique_id="{{unique_id}}" data-callback="{{callback}}" class="domestic_vote_voting {{class}}">{{show_view_count}}{{html}}</a>';
+
+			if ($id != '') {
+				$id = 'id="'.$id.'"';
+			}
 
 			$_tag = str_replace('{{type_id}}', $type_id, $_tag);
 			$_tag = str_replace('{{post_id}}', $post_id, $_tag);
@@ -327,16 +342,22 @@ class DomesticvoteControler {
 			$_tag = str_replace('{{unique_id}}', $unique_id, $_tag);
 			$_tag = str_replace('{{html}}', $html, $_tag);
 			$_tag = str_replace('{{class}}', $class, $_tag);
+			$_tag = str_replace('{{id}}', $id, $_tag);
+			$_tag = str_replace('{{callback}}', $callback, $_tag);
 
-			if($show_view_count) {
-				$_query = 'SELECT SUM( count ) AS count FROM '.DOMESTIC_VOTE_PLUGIN_COUNT_TABLE_NAME.' WHERE type_id = '.$type_id.' AND post_id = '.$post_id.' GROUP BY post_id';
-				global $wpdb;
-				$_result = $wpdb->get_results( $_query );
+
+			$_query = 'SELECT SUM( count ) AS count FROM '.DOMESTIC_VOTE_PLUGIN_COUNT_TABLE_NAME.' WHERE type_id = '.$type_id.' AND post_id = '.$post_id.' GROUP BY post_id';
+			global $wpdb;
+			$_result = $wpdb->get_results( $_query );
+
+			if($show_view_count == 'true') {
 				$_tag = str_replace('{{show_view_count}}', '<span class="dvote_count">'.$_result[0]->count.'</span>', $_tag);
 			}
 			else {
 				$_tag = str_replace('{{show_view_count}}', '', $_tag);
 			}
+			
+			$_tag = str_replace('{{count}}', is_null($_result[0]->count) ? '0' : $_result[0]->count , $_tag);
 
 			return $_tag;
 		}
@@ -350,6 +371,7 @@ $(function(){
 	// reset
 	$('.domestic_vote_voting').on('click',function(e){
 		var _self = $(this);
+		var _callback = $(this).data('callback');
 		e.preventDefault();
 		$.ajax({
 			type: 'POST',
@@ -365,7 +387,7 @@ $(function(){
 		})
 		.done(function( data ) {
 			_self.find('.dvote_count').text(data);
-			console.log(data);
+			eval(_callback);
 		});
 	});
 });
@@ -375,13 +397,31 @@ EOL;
 		add_action( 'wp_footer', 'domestic_vote_insert_script');
 
 	}
+
+	public static function isExistVoteByUniqueId($post_id, $unique_id) {
+		if( !isset($post_id) || empty($post_id) || is_null($post_id) ||
+			!isset($unique_id) || empty($unique_id) || is_null($unique_id) ) {
+			echo __('関数エラー ： 引数の指定に誤りがあります。未設定・空文字・NULL値の可能性があります。');
+		}
+
+		global $wpdb;
+		$_vote_data = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT id FROM '.DOMESTIC_VOTE_PLUGIN_COUNT_TABLE_NAME.' WHERE post_id = %d AND unique_id = %d'
+			,$post_id ,$unique_id)
+		);
+		if(count($_vote_data) > 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 }
 
-$CA = new DomesticvoteControler();
-$DU = new DomesticvoteUtil();
-$DV = new DomesticvoteValidator();
+$domestic_vote_controler = new DomesticvoteControler();
+$domestic_vote_util = new DomesticvoteUtil();
+$domestic_vote_validator = new DomesticvoteValidator();
 
 ?>
-
-<?php //echo do_shortcode('[dvote type_id="1" post_id="1" class="icon_good" html="<span class=\'good\'></span>役に立った"]'); ?>
-
+	

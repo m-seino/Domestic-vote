@@ -1,9 +1,9 @@
 
 <?php
 
-global $CA;
-global $DU;
-global $DV;
+global $domestic_vote_controler;
+global $domestic_vote_util;
+global $domestic_vote_validator;
 global $wp_roles;
 global $wp_post_types;
 global $menu;

@@ -2,8 +2,8 @@
 	include_once 'domestic_vote-vars.php';
 ?>
 <div class="wrap">
-	<h2><?php $DU->_($CA::$plugin_name); ?> <?php $DU->_('設定ページ'); ?> <a href="<?php echo $DU->thisPluginUrl('add'); ?>" class="add-new-h2" ><?php $DU->_('投票項目を追加'); ?></a></h2>
-	<link rel="stylesheet" type="text/css" href="<?php echo ($plugins_url.'/'.$CA::$plugin_fix.'/css/'.$CA::$plugin_fix.'.css'); ?>">
+	<h2><?php $domestic_vote_util->_($domestic_vote_controler::$plugin_name); ?> <?php $domestic_vote_util->_('設定ページ'); ?> <a href="<?php echo $domestic_vote_util->thisPluginUrl('add'); ?>" class="add-new-h2" ><?php $domestic_vote_util->_('投票項目を追加'); ?></a></h2>
+	<link rel="stylesheet" type="text/css" href="<?php echo ($plugins_url.'/'.$domestic_vote_controler::$plugin_fix.'/css/'.$domestic_vote_controler::$plugin_fix.'.css'); ?>">
 
 	<?php 
 		global $wpdb;
@@ -14,10 +14,9 @@
 	<table class="wp-list-table widefat fixed domestic-vote-table">
 		<thead>
 			<tr>
-				<th width="20%"><?php $DU->_('投票項目名'); ?></th>
-				<th width="70%"><?php $DU->_('投票リンク用ショートコード'); ?> 
-					<span>[<?php $DU->_('ショートコードヘルプ'); ?>]</span>
-					<p>[dvote type_id="<?php echo($value->id); ?>" post_id="{<?php $DU->_('投稿のID'); ?>}" html="{<?php $DU->_('aタグ内のHTML'); ?>}" unique_id="{<?php $DU->_('（任意）投票データの一意性を識別するID　数値のみ'); ?>}" class="{<?php $DU->_('（任意）aタグに付与するclass'); ?>}" show_view_count="{<?php $DU->_('（任意）boolean値　trueで得票数を表示'); ?>}" allow_duplicate_count="{<?php $DU->_('（任意）boolean値　unique_idの投票に重複を許可するか'); ?>}"]</p>
+				<th width="20%"><?php $domestic_vote_util->_('投票項目名'); ?></th>
+				<th width="70%"><?php $domestic_vote_util->_('投票リンク用ショートコード'); ?> 
+					<span><a href="https://github.com/m-seino/Domestic-vote" target="_blank">[<?php $domestic_vote_util->_('ショートコードヘルプ'); ?>]</a></span>
 				</th>
 			</tr>
 		</thead>
@@ -25,23 +24,23 @@
 			<?php foreach ($type_data as $key => $value): ?>
 			<tr>
 				<td>
-					<?php $DU->_($value->name); ?>
+					<?php $domestic_vote_util->_($value->name); ?>
 					<div class="row-actions">
 						<span class="edit">
-							<a href="<?php echo $DU->thisPluginUrl('info',$value->id); ?>"><?php $DU->_('詳細'); ?></a>
+							<a href="<?php echo $domestic_vote_util->thisPluginUrl('info',$value->id); ?>"><?php $domestic_vote_util->_('詳細'); ?></a>
 						</span>
 						|
 						<span class="edit">
-							<a href="<?php echo $DU->thisPluginUrl('edit',$value->id); ?>"><?php $DU->_('編集'); ?></a>
+							<a href="<?php echo $domestic_vote_util->thisPluginUrl('edit',$value->id); ?>"><?php $domestic_vote_util->_('編集'); ?></a>
 						</span>
 						|
 						<span class="delete">
-							<a href="<?php echo $DU->thisPluginUrl('delete',$value->id); ?>" class="dvote_delete" ><?php $DU->_('削除'); ?></a>
+							<a href="<?php echo $domestic_vote_util->thisPluginUrl('delete',$value->id); ?>" class="dvote_delete" ><?php $domestic_vote_util->_('削除'); ?></a>
 						</span>
 					</div>
 				</td>
 				<td>
-					[dvote type_id="<?php echo($value->id); ?>" post_id="{<?php $DU->_('投稿のID'); ?>}" html="{<?php $DU->_('aタグ内のHTML'); ?>}"]
+					[dvote type_id="<?php echo($value->id); ?>" post_id="{<?php $domestic_vote_util->_('投稿のID'); ?>}" html="{<?php $domestic_vote_util->_('aタグ内のHTML'); ?>}"]
 				</td>
 			</tr>
 			<?php endforeach ?>
@@ -49,9 +48,9 @@
 	</table>
 </div>
 <div class="wrap">
-	<h2><?php $DU->_('得票数一覧'); ?></h2>
+	<h2><?php $domestic_vote_util->_('得票数一覧'); ?></h2>
 	<p class="domestic-vote-progress-message">
-		<?php $DU->_('データ取得中'); ?>
+		<?php $domestic_vote_util->_('データ取得中'); ?>
 	</p>
 	<table id="info_table" class="tablesorter wp-list-table widefat fixed domestic-vote-table">
 		<thead id="info_table_head">
@@ -64,7 +63,7 @@
 	</table>
 </div>
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
-<script type="text/javascript" src="<?php echo ($plugins_url.'/'.$CA::$plugin_fix.'/js/'.$CA::$plugin_fix.'.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo ($plugins_url.'/'.$domestic_vote_controler::$plugin_fix.'/js/'.$domestic_vote_controler::$plugin_fix.'.js'); ?>"></script>
 <script type="text/javascript">
 $(function(){
 	$.ajax({
@@ -81,6 +80,12 @@ $(function(){
 	.done(function(data){
 		var d = document;
 		var _obj = {};
+
+		if(!data.columns_name) {
+			$('.domestic-vote-progress-message').text('<?php $domestic_vote_util->_("投票項目がありません"); ?>');
+			return;
+		}
+
 		$.each(data.columns_name,function(){
 			$('#info_table_head tr').append('<th><a href="#">'+this+'</a></th>');
 		})
@@ -102,7 +107,7 @@ $(function(){
 	});
 
 	$('.dvote_delete').on('click',function(e){
-		if(!window.confirm("<?php $DU->_('本当に削除しますか？');  ?>")){
+		if(!window.confirm("<?php $domestic_vote_util->_('本当に削除しますか？');  ?>")){
 			e.preventDefault();
 		}
 	})
