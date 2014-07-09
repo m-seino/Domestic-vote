@@ -28,14 +28,14 @@ Simple Custom Vote
 
 ### 投票数の表示
 htmlプロパティの設定値に{{count}}という文字を含めることで画面表示時の当該項目の得票数を表示できます
-ショートコード例:
+ショートコード例：
 <pre>
 	[dvote type_id="1" post_id="1"　html="得票数：{{count}}"]
 </pre>
 
 ### 投票後に得票数を反映させる
 htmlプロパティ内の要素で、classにdvote_countが指定されてる要素のtextを得票数に書き換えます
-ショートコード例:
+ショートコード例：
 <pre>
 	[dvote type_id="1" post_id="1" html="只今の得票数は<span class=\'dvote_count\'>{{count}}</span>です"]
 </pre>
@@ -43,7 +43,7 @@ htmlプロパティ内の要素で、classにdvote_countが指定されてる要
 ### コールバックの設定
 指定したコールバックは投票処理が行われたのちに実行されます。
 また、指定の値をevalにて評価するため、即時実行可能な値での設定をしてください。
-ショートコード例:
+ショートコード例：
 <pre>
 	// 実行する関数の指定
 	[dvote type_id="13" post_id="1" html="サンプル項目" callback="someFunction()"]
