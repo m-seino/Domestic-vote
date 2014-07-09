@@ -1,4 +1,4 @@
-Domestic-vote
+Simple Custom Vote
 =============
 このプラグインはまだ開発中です。
 
@@ -56,7 +56,7 @@ htmlプロパティ内の要素で、classにdvote_countが指定されてる要
 ### unique_idの投票済み判定
 post_idに対して特定のunique_idで投票済みであるかどうか以下の関数で論理値を返却します
 
-DomesticvoteControler::isExistVoteByUniqueId($post_id, $unique_id)
+SimpleCustomvoteControler::isExistVoteByUniqueId($post_id, $unique_id)
 
 - 引数
  * $post_id: 投稿のID
