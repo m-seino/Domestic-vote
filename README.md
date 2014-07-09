@@ -58,10 +58,10 @@ post_idに対して特定のunique_idで投票済みであるかどうか以下�
 
 DomesticvoteControler::isExistVoteByUniqueId($post_id, $unique_id)
 
-引数
-	$post_id: 投稿のID
-	$unique_id: 一意識別用のID
+- 引数
+ * $post_id: 投稿のID
+ * $unique_id: 一意識別用のID
 
-戻り値
-	true : 投票済み
-	false : 未投票
+- 戻り値
+ * true : 投票済み
+ * false : 未投票
