@@ -143,13 +143,13 @@ class SimpleCustomvoteControler {
 					echo "1";
 				}
 				else {
-					$_count = $vote_record[0]->count + 1;
+					$_count = $vote_record[0]->count;
 
 					if(($_POST['unique_id'] == '') || ($_POST['unique_id'] != '' && $_POST['allow_duplicate_count'] == 'true')) {
 						$result = $wpdb->query(
 							$wpdb->prepare(
 								'UPDATE '.SIMPLE_CUSTOM_VOTE_PLUGIN_COUNT_TABLE_NAME.' SET count = %d '.$_where,
-								$_count,
+								++$_count,
 								$_POST['type_id'],
 								$_POST['post_id'],
 								$_POST['unique_id'] == '' ? '0' : $_POST['unique_id']
@@ -398,18 +398,28 @@ EOL;
 
 	}
 
-	public static function isExistVoteByUniqueId($post_id, $unique_id) {
+	public static function isExistVoteByUniqueId($post_id, $unique_id, $type_id = null) {
 		if( !isset($post_id) || empty($post_id) || is_null($post_id) ||
 			!isset($unique_id) || empty($unique_id) || is_null($unique_id) ) {
 			echo __('関数エラー ： 引数の指定に誤りがあります。未設定・空文字・NULL値の可能性があります。');
 		}
 
 		global $wpdb;
-		$_vote_data = $wpdb->get_results(
-			$wpdb->prepare(
-				'SELECT id FROM '.SIMPLE_CUSTOM_VOTE_PLUGIN_COUNT_TABLE_NAME.' WHERE post_id = %d AND unique_id = %d'
-			,$post_id ,$unique_id)
-		);
+		$_vote_data = null;
+		if (is_null($type_id)) {
+			$_vote_data = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT id FROM '.SIMPLE_CUSTOM_VOTE_PLUGIN_COUNT_TABLE_NAME.' WHERE post_id = %d AND unique_id = %d'
+				,$post_id ,$unique_id)
+			);
+		}
+		else {
+			$_vote_data = $wpdb->get_results(
+				$wpdb->prepare(
+					'SELECT id FROM '.SIMPLE_CUSTOM_VOTE_PLUGIN_COUNT_TABLE_NAME.' WHERE post_id = %d AND unique_id = %d AND type_id = %d'
+				,$post_id ,$unique_id, $type_id)
+			);
+		}
 		if(count($_vote_data) > 0) {
 			return true;
 		}
