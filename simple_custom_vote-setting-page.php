@@ -38,12 +38,12 @@
 						</span>
 						|
 						<span class="delete">
-							<a href="<?php echo $simple_custom_vote_util->thisPluginUrl('delete',$value->id); ?>" class="dvote_delete" ><?php $simple_custom_vote_util->_('削除'); ?></a>
+							<a href="<?php echo $simple_custom_vote_util->thisPluginUrl('delete',$value->id); ?>" class="scvote_delete" ><?php $simple_custom_vote_util->_('削除'); ?></a>
 						</span>
 					</div>
 				</td>
 				<td>
-					[dvote type_id="<?php echo($value->id); ?>" post_id="{<?php $simple_custom_vote_util->_('投稿のID'); ?>}" html="{<?php $simple_custom_vote_util->_('aタグ内のHTML'); ?>}"]
+					[scvote type_id="<?php echo($value->id); ?>" post_id="{<?php $simple_custom_vote_util->_('投稿のID'); ?>}" html="{<?php $simple_custom_vote_util->_('aタグ内のHTML'); ?>}"]
 				</td>
 			</tr>
 			<?php endforeach ?>
@@ -109,7 +109,7 @@ $(function(){
 		});
 	});
 
-	$('.dvote_delete').on('click',function(e){
+	$('.scvote_delete').on('click',function(e){
 		if(!window.confirm("<?php $simple_custom_vote_util->_('本当に削除しますか？');  ?>")){
 			e.preventDefault();
 		}

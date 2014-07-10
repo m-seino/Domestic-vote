@@ -1,12 +1,12 @@
 <?php
 /*
 Plugin Name: Simple Custom Vote
-Plugin URI: https://github.com/m-seino/SimpleCustom-vote
+Plugin URI: https://github.com/m-seino/simple-custom-vote
 Description: 
-Version: 0.1
+Version: 1.0
 Author: Maiko Seino
 Author URI: http://incr.jp
-License: GPLv2
+License: GPL2
 */
 require_once( ABSPATH . "wp-includes/pluggable.php" );
 
@@ -351,7 +351,7 @@ class SimpleCustomvoteControler {
 			$_result = $wpdb->get_results( $_query );
 
 			if($show_view_count == 'true') {
-				$_tag = str_replace('{{show_view_count}}', '<span class="dvote_count">'.$_result[0]->count.'</span>', $_tag);
+				$_tag = str_replace('{{show_view_count}}', '<span class="scvote_count">'.$_result[0]->count.'</span>', $_tag);
 			}
 			else {
 				$_tag = str_replace('{{show_view_count}}', '', $_tag);
@@ -361,11 +361,11 @@ class SimpleCustomvoteControler {
 
 			return $_tag;
 		}
-		add_shortcode('dvote', 'simple_custom_vote_shortcode');
+		add_shortcode('scvote', 'simple_custom_vote_shortcode');
 
+// FIXME
 		function simple_custom_vote_insert_script() {
 echo<<<EOL
-<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
 <script type="text/javascript">
 $(function(){
 	// reset
@@ -386,7 +386,7 @@ $(function(){
 			}
 		})
 		.done(function( data ) {
-			_self.find('.dvote_count').text(data);
+			_self.find('.scvote_count').text(data);
 			eval(_callback);
 		});
 	});

@@ -30,14 +30,14 @@ Simple Custom Vote
 htmlプロパティの設定値に{{count}}という文字を含めることで画面表示時の当該項目の得票数を表示できます
 ショートコード例：
 <pre>
-	[dvote type_id="1" post_id="1"　html="得票数：{{count}}"]
+	[scvote type_id="1" post_id="1"　html="得票数：{{count}}"]
 </pre>
 
 ### 投票後に得票数を反映させる
-htmlプロパティ内の要素で、classにdvote_countが指定されてる要素のtextを得票数に書き換えます
+htmlプロパティ内の要素で、classにscvote_countが指定されてる要素のtextを得票数に書き換えます
 ショートコード例：
 <pre>
-	[dvote type_id="1" post_id="1" html="只今の得票数は<span class=\'dvote_count\'>{{count}}</span>です"]
+	[scvote type_id="1" post_id="1" html="只今の得票数は<span class=\'scvote_count\'>{{count}}</span>です"]
 </pre>
 
 ### コールバックの設定
@@ -46,10 +46,10 @@ htmlプロパティ内の要素で、classにdvote_countが指定されてる要
 ショートコード例：
 <pre>
 	// 実行する関数の指定
-	[dvote type_id="13" post_id="1" html="サンプル項目" callback="someFunction()"]
+	[scvote type_id="13" post_id="1" html="サンプル項目" callback="someFunction()"]
 
 	// 無名関数の場合
-	[dvote type_id="13" post_id="1" html="サンプル項目" callback="(function(){/* something to do */})()"]
+	[scvote type_id="13" post_id="1" html="サンプル項目" callback="(function(){/* something to do */})()"]
 </pre>
 
 ### unique_idの投票済み判定
