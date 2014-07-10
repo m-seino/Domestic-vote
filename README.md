@@ -55,11 +55,12 @@ htmlプロパティ内の要素で、classにscvote_countが指定されてる�
 ### unique_idの投票済み判定
 post_idに対して特定のunique_idで投票済みであるかどうか以下の関数で論理値を返却します
 
-SimpleCustomvoteControler::isExistVoteByUniqueId($post_id, $unique_id)
+SimpleCustomvoteControler::isExistVoteByUniqueId($post_id, $unique_id, (Optional)$type_id)
 
 - 引数
  * $post_id: 投稿のID
  * $unique_id: 一意識別用のID
+ * $type_id:(オプション) 投稿項目のID
 
 - 戻り値
  * true : 投票済み
