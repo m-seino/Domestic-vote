@@ -1,4 +1,4 @@
-=== Plugin Name ===
+=== Simple Custom Vote ===
 Contributors: myco
 Donate link: http://incr.jp/
 Tags: vote
