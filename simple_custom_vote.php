@@ -175,7 +175,7 @@ class SimpleCustomvoteControler {
 					die;
 				}
 
-				$_subQuerys = array();
+				$_sub_querys = array();
 				$_columns_str = '';
 				$_where_arr = array();
 				// 投票項目の取得
@@ -185,7 +185,7 @@ class SimpleCustomvoteControler {
 					$_arr['columns_name'][] = $value->name;
 					$_where_arr[] = 'count_'.$value->id.' IS NOT NULL';
 
-					$_subQuerys[] = '
+					$_sub_querys[] = '
 					(
 						SELECT 
 							post.ID as ID'.$value->id.', 
@@ -203,11 +203,11 @@ class SimpleCustomvoteControler {
 
 				// 投票内訳のクエリを生成
 				$_stash = array();
-				$_cnt =  count($_subQuerys);
+				$_cnt =  count($_sub_querys);
 
 				$i = 0;
 				for (; $i < $_cnt; $i++) { 
-					$_stash[] = $_subQuerys[$i];
+					$_stash[] = $_sub_querys[$i];
 					if(count($_stash) == 2) {
 						$_temp = '';
 						$_temp2 = '';
@@ -230,10 +230,10 @@ class SimpleCustomvoteControler {
 				}
 
 
-				$_joinQuery = array();
-				$_subQueryName = 'sub'.$_arr['columns_id'][$i-1];
+				$_join_query = array();
+				$_sub_query_name = 'sub'.$_arr['columns_id'][$i-1];
 				foreach ($_arr['columns_id'] as $key => $value) {
-					$_joinQuery[] = 'post.ID = '.$_subQueryName.'.ID'.$value;
+					$_join_query[] = 'post.ID = '.$_sub_query_name.'.ID'.$value;
 				}
 				$_query = '
 				SELECT
@@ -245,7 +245,7 @@ class SimpleCustomvoteControler {
 				LEFT JOIN
 					'.$_temp.'
 				ON
-					'.implode(' OR ', $_joinQuery).'
+					'.implode(' OR ', $_join_query).'
 				WHERE 
 					'.implode(' OR ', $_where_arr).'
 				';
@@ -325,7 +325,7 @@ class SimpleCustomvoteControler {
 				echo __('ショートコードエラー ： htmlの指定がありません。');
 				return;
 			}
-			if($allow_duplicate_count == 'true' && $unique_id != '') {
+			if($allow_duplicate_count == 'true' && $unique_id == '') {
 				echo __('ショートコードエラー ： allow_duplicate_countはunique_idの指定が必要です。');
 				return;
 			}
@@ -398,6 +398,33 @@ EOL;
 
 	}
 
+	public static function getVoteCount($post_id, $type_id = null) {
+		global $wpdb;
+		$_query = 'SELECT sum(count) as count FROM '.SIMPLE_CUSTOM_VOTE_PLUGIN_COUNT_TABLE_NAME;
+		$_vote_data = null;
+		if (is_null($type_id)) {
+			$_vote_data = $wpdb->get_results(
+				$wpdb->prepare(
+					$_query.' WHERE post_id = %d '
+				,$post_id )
+			);
+		}
+		else {
+			$_vote_data = $wpdb->get_results(
+				$wpdb->prepare(
+					$_query.' WHERE post_id = %d AND type_id = %d'
+				,$post_id ,$type_id)
+			);
+		}
+
+		if(!is_null($_vote_data) && count($_vote_data) > 0) {
+			return $_vote_data[0]->count;
+		}
+		else {
+			throw new Exception("Error", 1);
+		}
+	}
+
 	public static function isExistVoteByUniqueId($post_id, $unique_id, $type_id = null) {
 		if( !isset($post_id) || empty($post_id) || is_null($post_id) ||
 			!isset($unique_id) || empty($unique_id) || is_null($unique_id) ) {
@@ -406,27 +433,29 @@ EOL;
 
 		global $wpdb;
 		$_vote_data = null;
+		$_query = 'SELECT id FROM '.SIMPLE_CUSTOM_VOTE_PLUGIN_COUNT_TABLE_NAME;
 		if (is_null($type_id)) {
 			$_vote_data = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT id FROM '.SIMPLE_CUSTOM_VOTE_PLUGIN_COUNT_TABLE_NAME.' WHERE post_id = %d AND unique_id = %d'
+					$_query.' WHERE post_id = %d AND unique_id = %d'
 				,$post_id ,$unique_id)
 			);
 		}
 		else {
 			$_vote_data = $wpdb->get_results(
 				$wpdb->prepare(
-					'SELECT id FROM '.SIMPLE_CUSTOM_VOTE_PLUGIN_COUNT_TABLE_NAME.' WHERE post_id = %d AND unique_id = %d AND type_id = %d'
+					$_query.' WHERE post_id = %d AND unique_id = %d AND type_id = %d'
 				,$post_id ,$unique_id, $type_id)
 			);
 		}
-		if(count($_vote_data) > 0) {
+		if(!is_null($_vote_data) && count($_vote_data) > 0) {
 			return true;
 		}
 		else {
 			return false;
 		}
 	}
+
 }
 
 $simple_custom_vote_controler = new SimpleCustomvoteControler();
