@@ -16,7 +16,7 @@
 			<tr>
 				<th width="20%"><?php $simple_custom_vote_util->_('投票項目名'); ?></th>
 				<th width="70%"><?php $simple_custom_vote_util->_('投票リンク用ショートコード'); ?> 
-					<span><a href="https://github.com/m-seino/SimpleCustom-vote" target="_blank">[<?php $simple_custom_vote_util->_('ショートコードヘルプ'); ?>]</a></span>
+					<span><a href="https://github.com/m-seino/simple-custom-vote" target="_blank">[<?php $simple_custom_vote_util->_('ショートコードヘルプ'); ?>]</a></span>
 				</th>
 			</tr>
 		</thead>
