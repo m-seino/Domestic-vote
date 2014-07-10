@@ -52,16 +52,31 @@ htmlプロパティ内の要素で、classにscvote_countが指定されてる�
 	[scvote type_id="13" post_id="1" html="サンプル項目" callback="(function(){/* something to do */})()"]
 </pre>
 
-### unique_idの投票済み判定
-post_idに対して特定のunique_idで投票済みであるかどうか以下の関数で論理値を返却します
+## 関数
 
-SimpleCustomvoteControler::isExistVoteByUniqueId($post_id, $unique_id, (Optional)$type_id)
+#### SimpleCustomvoteControler::isExistVoteByUniqueId($post_id, $unique_id, (Optional)$type_id)
+
+post_idに対して特定のunique_idで投票済みであるかどうか以下の関数で論理値を返却します。
+投票項目ごとに投票済みかどうかを知りたい場合は$type_idを指定してください。
 
 - 引数
  * $post_id: 投稿のID
  * $unique_id: 一意識別用のID
- * $type_id:(オプション) 投稿項目のID
+ * $type_id:(オプション) 投票項目のID
 
 - 戻り値
  * true : 投票済み
  * false : 未投票
+
+#### SimpleCustomvoteControler::getVoteCount($post_id, (Optional)$type_id)
+
+post_idに対しての得票数合計を返却します。
+投票項目ごとの投票数を取得したい場合は$type_idを指定してください。
+データが取得できない場合は例外をスローします。
+
+- 引数
+ * $post_id: 投稿のID
+ * $type_id:(オプション) 投票項目のID
+
+- 戻り値
+ * int 得票数合計
