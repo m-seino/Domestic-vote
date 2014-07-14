@@ -36,17 +36,6 @@ This plugin is provided to those functions.
 
 That's it. You can access the permalinks setting by going to *Settings -> Permalinks*.
 
-
-== Frequently Asked Questions ==
-
-= A question that someone might have =
-
-An answer to that question.
-
-= What about foo bar? =
-
-Answer to foo bar dilemma.
-
 == Screenshots ==
 
 * screenshot_01.jpg
