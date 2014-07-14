@@ -8,9 +8,6 @@ Author: Maiko Seino
 Author URI: http://incr.jp
 License: GPL2
 */
-require_once( ABSPATH . "wp-includes/pluggable.php" );
-
-
 class SimpleCustomvoteUtil {
 	public function thisPluginUrl($mode = null , $id = null) {
 		$baseUrl = admin_url().'options-general.php?page='.SimpleCustomvoteControler::$plugin_fix.'/'.SimpleCustomvoteControler::$plugin_fix.'.php';
@@ -98,6 +95,7 @@ class SimpleCustomvoteControler {
 		}
 		function simple_custom_vote_regist_ajax_actions() {
 			add_action( 'wp_ajax_simple_custom_vote_countup', 'simple_custom_vote_countup_callback' );
+			add_action( 'wp_ajax_nopriv_simple_custom_vote_countup', 'simple_custom_vote_countup_callback' );
 			function simple_custom_vote_countup_callback() {
 				// Validation
 				if(!isset($_POST['type_id']) || empty($_POST['type_id'])) {
@@ -161,6 +159,7 @@ class SimpleCustomvoteControler {
 				die;
 			}
 			add_action( 'wp_ajax_simple_custom_vote_read', 'simple_custom_vote_read_callback' );
+			add_action( 'wp_ajax_nopriv_simple_custom_vote_read', 'simple_custom_vote_read_callback' );
 			function simple_custom_vote_read_callback() {
 				global $wpdb;
 				$_arr = array();
@@ -350,14 +349,16 @@ class SimpleCustomvoteControler {
 			global $wpdb;
 			$_result = $wpdb->get_results( $_query );
 
+			$_count = isset($_result[0]) ? $_result[0]->count : 0;
+
 			if($show_view_count == 'true') {
-				$_tag = str_replace('{{show_view_count}}', '<span class="scvote_count">'.$_result[0]->count.'</span>', $_tag);
+				$_tag = str_replace('{{show_view_count}}', '<span class="scvote_count">'.$_count.'</span>', $_tag);
 			}
 			else {
 				$_tag = str_replace('{{show_view_count}}', '', $_tag);
 			}
-			
-			$_tag = str_replace('{{count}}', is_null($_result[0]->count) ? '0' : $_result[0]->count , $_tag);
+
+			$_tag = str_replace('{{count}}', is_null($_count) ? '0' : $_count , $_tag);
 
 			return $_tag;
 		}
@@ -365,17 +366,17 @@ class SimpleCustomvoteControler {
 
 // FIXME
 		function simple_custom_vote_insert_script() {
+			$_admin_ajax_url = admin_url('admin-ajax.php');
 echo<<<EOL
 <script type="text/javascript">
-$(function(){
-	// reset
+jQuery(function( $ ) {
 	$('.simple_custom_vote_voting').on('click',function(e){
 		var _self = $(this);
 		var _callback = $(this).data('callback');
 		e.preventDefault();
 		$.ajax({
 			type: 'POST',
-			url: ajaxurl,
+			url: '$_admin_ajax_url',
 			datatype : 'text',
 			data: {
 				'action': 'simple_custom_vote_countup',
@@ -394,8 +395,18 @@ $(function(){
 </script>
 EOL;
 		}
-		add_action( 'wp_footer', 'simple_custom_vote_insert_script');
+		//add_action( 'wp_footer', 'simple_custom_vote_insert_script');
 
+		function simple_custom_vote_admin_scripts() {
+			wp_enqueue_script( 'wp_enqueue_scripts', plugins_url( '/js/'.SimpleCustomvoteControler::$plugin_fix.'.js' , __FILE__ ), array( 'jquery' ), '20140714', true );
+		}
+		function my_styles() {
+			wp_enqueue_style( 'simple-custom-vote-style', plugins_url( '/css/'.SimpleCustomvoteControler::$plugin_fix.'.css' , __FILE__ ), array( SimpleCustomvoteControler::$plugin_fix ) ,false);
+		}
+
+		add_action( 'admin_enqueue_scripts' , 'simple_custom_vote_admin_scripts');
+		add_action( 'wp_enqueue_scripts' , 'simple_custom_vote_insert_script');
+		add_action( 'wp_enqueue_scripts' , 'my_styles');
 	}
 
 	public static function getVoteCount($post_id, $type_id = null) {

@@ -61,7 +61,9 @@
 				</th>
 				<td>
 					<input name="name" value="<?php $simple_custom_vote_util->iz($_POST['name']); ?>" />
+					<?php if (isset($valid['name'])): ?>
 					<?php $simple_custom_vote_util->_echo($valid['name']); ?>
+					<?php endif ?>
 				</td>
 			</tr>
 		</tbody>

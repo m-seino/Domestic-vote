@@ -3,7 +3,7 @@
 ?>
 <div class="wrap">
 	<h2><?php $simple_custom_vote_util->_($simple_custom_vote_controler::$plugin_name); ?> <?php $simple_custom_vote_util->_('設定ページ'); ?> <a href="<?php echo $simple_custom_vote_util->thisPluginUrl('add'); ?>" class="add-new-h2" ><?php $simple_custom_vote_util->_('投票項目を追加'); ?></a></h2>
-	<link rel="stylesheet" type="text/css" href="<?php echo ($plugins_url.'/'.$simple_custom_vote_controler::$plugin_fix.'/css/'.$simple_custom_vote_controler::$plugin_fix.'.css'); ?>">
+	<link rel="stylesheet" type="text/css" href="<?php echo plugins_url( $simple_custom_vote_controler::$plugin_fix.'.css', __FILE__ ); ?>">
 
 	<?php 
 		global $wpdb;
@@ -65,10 +65,8 @@
 		</tbody>
 	</table>
 </div>
-<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
-<script type="text/javascript" src="<?php echo ($plugins_url.'/'.$simple_custom_vote_controler::$plugin_fix.'/js/'.$simple_custom_vote_controler::$plugin_fix.'.js'); ?>"></script>
 <script type="text/javascript">
-$(function(){
+jQuery(function( $ ) {
 	$.ajax({
 		type: "POST",
 		url: ajaxurl,
